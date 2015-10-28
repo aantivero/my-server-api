@@ -25,6 +25,26 @@ exports.test_handle_GET_request = function (test) {
     responseMock.verify();
     test.done();
 };
+exports.test_handle_Bad_request = function (test) {
+    var response = {
+        'writeHead' : function () {},
+        'end' : function () {}
+    }
+    var responseMock = sinon.mock(response);
+    responseMock.expects('end').once().withArgs('Bad request');
+    responseMock.expects('writeHead').once().withArgs(400, {
+        'Content-Type': 'text/plain'
+    });
+
+    var request = {};
+    var requestMock = sinon.mock(request);
+    requestMock.method = 'OTHER';
+
+    var http_module = require('../modules/http-module');
+    http_module.handle_requet(requestMock, response);
+    responseMock.verify();
+    test.done();
+}
 
 
 
