@@ -1,5 +1,7 @@
-var http = require('http');
-var port = 8080;
+/**
+ * Http Server module
+ * Created by alex on 27/10/2015.
+ */
 
 function handle_GET_request (response) {
     response.writeHead(200, {
@@ -43,7 +45,7 @@ function handle_bad_request (response) {
     response.end('Bad request');
 }
 
-function handle_request(request, response) {
+exports.handle_requet = function (request, response) {
     switch (request.method) {
         case 'GET':
             handle_GET_request(response);
@@ -63,11 +65,7 @@ function handle_request(request, response) {
         default:
             handle_bad_request(response)
             break;
-            
+
     }
-    console.log('Request processing ended');
+    console.log('Request processing by http-module ended');
 }
-
-http.createServer(handle_request).listen(port, '127.0.0.1');
-
-console.log('Started Node.js http server listen at http://127.0.0.1:' + port);
