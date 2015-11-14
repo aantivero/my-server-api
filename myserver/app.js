@@ -4,11 +4,14 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var url = require('url');
+var contacts = require('./modules/contacts');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+//var mirouter = express.Router();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,6 +27,33 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+
+//Contacts--------
+app.get('/contacts', function(req, res){
+  var get_params = url.parse(req.url, true).query;
+  if (Object.keys(get_params).length == 0) {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(contacts.list()));
+  } else {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify(contacts.query_by_arg(get_params.arg, get_params.value)));
+  }
+});
+app.get('/contacts/:number', function(req, res){
+  res.setHeader('content-type', 'application/json');
+  res.end(JSON.stringify(contacts.query(req.params.number)));
+});
+app.get('/groups', function(req, res){
+  console.log('groups');
+  res.setHeader('content-type', 'application/json');
+  res.end(JSON.stringify(contacts.list_groups()));
+});
+app.get('/groups/:name', function(req, res){
+  console.log('groups name');
+  res.setHeader('content-type', 'application/json');
+  res.end(JSON.stringify(contacts.get_members(req.params.name)));
+})
+//Contacts--------
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
