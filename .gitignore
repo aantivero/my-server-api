@@ -43,5 +43,6 @@ Temporary Items
 .apdisk
 
 /myserver/node_modules
+/myserver/contact
 /node_modules
 /.idea
