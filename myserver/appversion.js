@@ -11,7 +11,8 @@ var express = require('express')
     , errorHandler = require('errorhandler')
     , mongoose = require('mongoose')
     , v1 = require('./modules/contactdataservice_1')
-    , v2 = require('./modules/contactdataservice_2');
+    , v2 = require('./modules/contactdataservice_2')
+    , Grid = require('gridfs-stream');
 
 var app = express();
 var url = require('url');
@@ -21,7 +22,8 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(methodOverride());
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({extended: true, limit: '50mb'}));
 
 //development only
 if ('development' == app.get('env')) {
@@ -44,6 +46,10 @@ var contactSchema = new mongoose.Schema({
 });
 
 var Contact = mongoose.model('Contact', contactSchema);
+
+//gridfs
+var mongodb = mongoose.connection;
+var gfs = Grid(mongodb.db, mongoose.mongo);
 
 app.get('/v1/contacts/:number', function (req, res) {
     console.log(req.url + ' : querying for ' + req.params.number);
@@ -82,5 +88,29 @@ app.get('/contacts', function(req, res) {
     res.end('Version 2 is moved to /contacts/: ');
 });
 */
+app.get('/v2/contacts/:primarycontactnumber/image', function (req, res) {
+    v2.getImage(gfs, req.params.primarycontactnumber, res);
+});
+app.get('/contacts/:primarycontactnumber/image', function (req, res) {
+    v2.getImage(gfs, req.params.primarycontactnumber, res);
+});
+app.post('/v2/contacts/:primarycontactnumber/image', function (req, res) {
+    v2.updateImage(gfs, req, res);
+});
+app.post('/contacts/:primarycontactnumber/image', function (req, res) {
+    v2.updateImage(gfs, req, res);
+});
+app.put('/v2/contacts/:primarycontactnumber/image', function (req, res){
+    v2.updateImage(gfs, req, res);
+});
+app.put('/contacts/:primarycontactnumber/image', function (req, res){
+    v2.updateImage(gfs, req, res);
+});
+app.delete('/v2/contacts/:primarycontactnumber/image', function (req, res) {
+    v2.deleteImage(gfs, mongodb.db, req.params.primarycontactnumber, res);
+});
+app.delete('/contacts/:primarycontactnumber/image', function (req, res) {
+    v2.deleteImage(gfs, mongodb.db, req.params.primarycontactnumber, res);
+});
 console.log('Running at port ' + app.get('port'));
 http.createServer(app).listen(app.get('port'));
